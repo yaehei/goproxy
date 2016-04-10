@@ -61,21 +61,13 @@ ifneq (,$(findstring mips,$(GOARCH)))
 endif
 
 .PHONY: build
-build: normname
-	ls -lht $(DISTDIR)
-
-.PHONY: normname
-normname: $(DISTDIR)/$(PACKAGE)_$(GOOS)_$(GOARCH)-$(RELEASE)$(GOPROXY_DISTEXT)
+build: $(DISTDIR)/$(PACKAGE)_$(GOOS)_$(GOARCH)-$(RELEASE)$(GOPROXY_DISTEXT)
 	mv $< $(shell echo $< | sed 's/_darwin_/_macosx_/') || true
+	ls -lht $(DISTDIR)
 
 .PHONY: clean
 clean:
 	$(RM) -rf $(BUILDDIR)
-
-.PHONY: release
-release:
-	# make release GITHUB_TAG=r256
-	GITHUB_TAG=$(GITHUB_TAG) bash -s <assets/scripts/release.sh
 
 $(DISTDIR)/$(PACKAGE)_$(GOOS)_$(GOARCH)-$(RELEASE)$(GOPROXY_DISTEXT): $(OBJECTS)
 	mkdir -p $(DISTDIR)
@@ -86,5 +78,4 @@ $(DISTDIR)/$(PACKAGE)_$(GOOS)_$(GOARCH)-$(RELEASE)$(GOPROXY_DISTEXT): $(OBJECTS)
 
 $(OBJECTDIR)/$(GOPROXY_EXE):
 	mkdir -p $(OBJECTDIR)
-	# awk 'match($1, /"((github\.com|golang\.org|gopkg\.in)\/.+)"/) {if (!seen[$1]++) {gsub("\"", "", $1); print $1}}' `find . -name "*.go"` | xargs -n1 -i go get -v {}
 	go build -v -ldflags="$(LDFLAGS)" -o $@ .
